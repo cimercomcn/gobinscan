@@ -1,15 +1,15 @@
 package gobinscan
 
 import (
-	"fmt"
-	"os/exec"
-	"path/filepath"
-	"regexp"
-	"strconv"
-	"strings"
+    "fmt"
+    "os/exec"
+    "path/filepath"
+    "regexp"
+    "strconv"
+    "strings"
 
-	"github.com/fatih/color"
-	"github.com/neumannlyu/golog"
+    "github.com/fatih/color"
+    "github.com/neumannlyu/golog"
 )
 
 // 分析模块的运行入口，调用这个函数开始分析
@@ -28,7 +28,7 @@ func analysis(rootdir string) {
     defaultLog.Info("开始校验ELF文件...\n")
     passed, warn := checkElfFilesType(knownfiles)
     oKLog.Logln("校验ELF文件完成。")
-    color.New(color.BgWhite).Print(fmt.Sprintf("    [PASS - %d] [WARN - %d]    ", passed, warn))
+    color.New(color.BgWhite).Print(fmt.Sprintf("                                [PASS - %d] [WARN - %d]                                ", passed, warn))
     fmt.Printf("\n\n\n")
 
     // 3. 未知中的elf 加20分

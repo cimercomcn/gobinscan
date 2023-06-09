@@ -198,3 +198,29 @@ func hasSameNameCompressedFile(name string, files []ExtractedFile) (bool, string
     }
     return false, ""
 }
+
+// 检查固件是否被加密
+// true: 加密; false: 未加密
+func isEncrypted() bool {
+    // 判断条件1: 是否有 squashfs-root 目录
+    pass1 := true
+    fs, err := os.ReadDir(g_bin_extract_dir)
+    golog.CheckError(err)
+
+    // 遍历目录中的文件。如果遇到某些文件时，将跳过。
+    for _, file := range fs {
+        if file.IsDir() && file.Name() == "squashfs-root" {
+            pass1 = false
+            break
+        }
+    }
+
+    // 判断2: 正常情况下squashfs-root目录下应该会有多个文件，如果只有一个文件应该就是加密了。
+    pass2 := false
+    squashfs_root := filepath.Join(g_bin_extract_dir, "squashfs-root")
+    if fs, err := os.ReadDir(squashfs_root); golog.CheckError(err) || len(fs) <= 1 {
+        pass2 = true
+    }
+
+    return pass1 || pass2
+}

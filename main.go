@@ -79,6 +79,19 @@ func Run() Result {
         oKLog.Logln("[提取完成] 提取的文件保存在 " + g_bin_extract_dir + " 目录下")
     }
 
+    // 检查固件加密情况
+    if isEncrypted() {
+        defaultLog.Fatal("发现固件被加密，请解密后再尝试分析。\n")
+        return report
+    } else {
+        var mytag golog.LogLevel
+        mytag.Tag = "PASS"
+        mytag.Fgcolor = color.FgGreen
+        mylog := NewLog(mytag)
+        mylog.UpdateElement(mytag)
+        mylog.Logln("固件加密未加密")
+    }
+
     // 分析
     defaultLog.Info("\n\n\t\t\t[开始分析固件]\n\n")
     analysis(filepath.Join(g_bin_extract_dir, "_"+filepath.Base(g_bin_file_path)+".extracted"))
