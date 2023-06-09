@@ -1,6 +1,7 @@
 package gobinscan
 
 import (
+    "fmt"
     "testing"
 
     "github.com/neumannlyu/golog"
@@ -13,6 +14,6 @@ func TestMain(m *testing.M) {
     pcfg.DBPassword = "123456"
     pcfg.DBName = "lydb"
     if CheckEnv() {
-        Run()
+        fmt.Printf("Run().ToJson(): \n%s\n", Run().ToJson())
     }
 }

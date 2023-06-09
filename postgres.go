@@ -40,8 +40,8 @@ func closePostgresDB() {
 // 从known_file表中查询
 //  @param 关键字：文件名
 //  @return known_file_struct文件信息结构体的数组
-func queryKnownFileTable(f *File) bool {
-    qstr := fmt.Sprintf(`SELECT * FROM known_file_table where file_name='%s'`, f.FileName)
+func queryKnownFileTable(f *ExtractedFile) bool {
+    qstr := fmt.Sprintf(`SELECT * FROM known_file_table where file_name='%s'`, f.Name)
     rows, err := g_postgres_db.Query(qstr)
     if golog.CheckError(err) {
         defaultLog.Error(err.Error())
@@ -52,7 +52,7 @@ func queryKnownFileTable(f *File) bool {
     if rows.Next() {
         var id int  // 数据库的索引字段，抛弃。
         var idx int // 防止重名的文件序号，抛弃
-        err = rows.Scan(&id, &f.FileName, &idx, &f.TypeIndex, &f.Score, &f.Count, &f.Md5, &f.Description)
+        err = rows.Scan(&id, &f.Name, &idx, &f.TypeIndex, &f.Score, &f.Count, &f.Md5, &f.Description)
         if golog.CheckError(err) {
             defaultLog.Error(err.Error())
             return false
@@ -66,8 +66,8 @@ func queryKnownFileTable(f *File) bool {
 // 从file_suffix表中查询
 //  @param 文件结构体
 //  @return 是否查询到对应的记录
-func queryFileSuffixTable(f *File) bool {
-    qstr := fmt.Sprintf(`SELECT description FROM file_suffix_table where suffix_name='%s'`, filepath.Ext(f.FileName))
+func queryFileSuffixTable(f *ExtractedFile) bool {
+    qstr := fmt.Sprintf(`SELECT description FROM file_suffix_table where suffix_name='%s'`, filepath.Ext(f.Name))
     rows, err := g_postgres_db.Query(qstr)
     if golog.CheckError(err) {
         defaultLog.Error(err.Error())
@@ -93,7 +93,7 @@ func queryFileSuffixTable(f *File) bool {
         // 也有可能添加其他的后缀。如：.so.bak
 
         // 2.将文件名按照.进行分割，然后从后往前依次查找是否有符合的后缀名
-        parts := strings.Split(f.FileName, ".")
+        parts := strings.Split(f.Name, ".")
         tail := "" //后缀名的尾巴
         for i := len(parts) - 1; i > 0; i-- {
             statement := fmt.Sprintf(`SELECT type_index,score,description FROM file_suffix_table where suffix_name='%s'`, "."+parts[i]+".$${version}$$")
@@ -123,7 +123,7 @@ func queryFileSuffixTable(f *File) bool {
 
 // 从内核CVE表中查询
 //  @return 所有关于内核CVE的记录
-func queryKernelVulnTable() (kvs []KernelVulnerablity) {
+func queryKernelVulnTable() (kvs []Vulnerablity) {
     rows, err := g_postgres_db.Query(`SELECT * FROM kernel_vulnerability_table`)
     if err != nil {
         defaultLog.Error(err.Error())
@@ -134,8 +134,8 @@ func queryKernelVulnTable() (kvs []KernelVulnerablity) {
     for rows.Next() {
         // 数据库的索引字段，抛弃。
         var id int
-        var kv KernelVulnerablity
-        err = rows.Scan(&id, &kv.VulID, &kv.AffectedKernelVer, &kv.VulType, &kv.VulDescription, &kv.Severity, &kv.FixSuggestion)
+        var kv Vulnerablity
+        err = rows.Scan(&id, &kv.ID, &kv.AffectedVersion, &kv.Type, &kv.Description, &kv.Severity, &kv.FixSuggestion)
         if err != nil {
             fmt.Println(err)
         }
@@ -193,12 +193,13 @@ func queryBinaryFileDetailInfo(file string, ver Version) string {
     return ""
 }
 
-func queryBinaryProgramVulnerability(program_name string) (s1, s2, s3, s4, s5, s6, s7 string) {
+func queryBinaryProgramVulnerability(program_name string) Vulnerablity {
+    var vuln Vulnerablity
     qstr := fmt.Sprintf(`SELECT * FROM program_vulnerability_table where file_name='%s'`, program_name)
     rows, err := g_postgres_db.Query(qstr)
     if err != nil {
         defaultLog.Error(err.Error())
-        return
+        return vuln
     }
     defer rows.Close()
 
@@ -206,9 +207,10 @@ func queryBinaryProgramVulnerability(program_name string) (s1, s2, s3, s4, s5, s
         // 数据库的索引字段，抛弃。
         var id int
         //id ,vid ,file_name , affected_ver  vtype TEXT, vdescription TEXT, severity INT, fix_suggestion
-        golog.CheckError(rows.Scan(&id, &s1, &s2, &s3, &s4, &s5, &s6, &s7))
+        golog.CheckError(rows.Scan(&id, &vuln.ID, &vuln.TargetOfAttack, &vuln.AffectedVersion,
+            &vuln.Type, &vuln.Description, &vuln.Severity, &vuln.FixSuggestion))
     }
-    return
+    return vuln
 }
 
 // 获取某个类型的编号。

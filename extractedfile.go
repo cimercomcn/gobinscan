@@ -28,11 +28,11 @@ const (
 )
 
 // 文件的结构体，描述文件的信息
-type File struct {
+type ExtractedFile struct {
     // 文件名
-    FileName string
+    Name string
     // 文件所在的目录
-    FileDir string
+    Dir string
     // 文件类别。区分目录和一般文件。
     TypeIndex int
     // 文件类别名称说明。
@@ -51,7 +51,7 @@ type File struct {
 //  @param root 要分析的目录
 //  @return knownf 已知文件信息的数组
 //  @return unknownf 未知文件的信息数组
-func scanExtractedFiles(root string) (knownfiles, unknownfiles []File) {
+func scanExtractedFiles(root string) (knownfiles, unknownfiles []ExtractedFile) {
     // 搜索root（一般为释放的目录）下的所有文件。
     // 这里的搜索不是遍历，会根据固件的特性，避免分析某些文件和文件夹
     allfiles := walkBinExtractedDir(root)
@@ -66,7 +66,7 @@ func scanExtractedFiles(root string) (knownfiles, unknownfiles []File) {
             tag.Tag = " UNKNOWN "
             tag.Fgcolor = color.FgHiYellow
             tag.Font = color.Underline
-            NewLog(tag).Logln(file.FileName)
+            NewLog(tag).Logln(file.Name)
         }
     }
     return
@@ -77,7 +77,7 @@ func scanExtractedFiles(root string) (knownfiles, unknownfiles []File) {
 // skip file: 以.开头的文件，一般情况下这些文件为无关的隐藏文件。
 //  @param current_path 想要遍历的目录
 //  @return files 文件信息数组
-func walkBinExtractedDir(current_path string) (files []File) {
+func walkBinExtractedDir(current_path string) (files []ExtractedFile) {
     // 获取指定目录中的所有文件和子目录
     fs, err := os.ReadDir(current_path)
     if golog.CheckError(err) {
@@ -92,16 +92,16 @@ func walkBinExtractedDir(current_path string) (files []File) {
                 continue
             }
 
-            var kf File
-            kf.FileName = file.Name()
-            kf.FileDir = current_path
+            var kf ExtractedFile
+            kf.Name = file.Name()
+            kf.Dir = current_path
             kf.TypeIndex = FILETYPE_DIR // 文件的类别为目录
             files = append(files, kf)
             // 如果是目录，递归遍历该目录
             // fas = file attributes
             fas := walkBinExtractedDir(filepath.Join(current_path, file.Name()))
             if err != nil {
-                return []File{}
+                return []ExtractedFile{}
             }
 
             // 保存结果
@@ -113,9 +113,9 @@ func walkBinExtractedDir(current_path string) (files []File) {
             }
 
             // 如果是文件，进行处理
-            var kf File
-            kf.FileName = file.Name()
-            kf.FileDir = current_path
+            var kf ExtractedFile
+            kf.Name = file.Name()
+            kf.Dir = current_path
             kf.TypeIndex = FILECATEGORY_FILE // 文件类别为普通文件
 
             // 保存结果
@@ -143,7 +143,7 @@ func isStringArrayContain(str string, array []string) bool {
 // @file 待检查的文件
 // @allfiles 固件中提取出所有的文件
 // @return 是否是已知文件
-func isKnownFile(file *File, allfiles []File) bool {
+func isKnownFile(file *ExtractedFile, allfiles []ExtractedFile) bool {
     var mytag golog.LogLevel
     mytag.Tag = "   OK    "
     mytag.Fgcolor = color.FgHiBlue
@@ -155,22 +155,22 @@ func isKnownFile(file *File, allfiles []File) bool {
     */
     // 1.通过文件全名来识别
     if queryKnownFileTable(file) {
-        mylog.Logln(file.FileName + " {=} " + file.Description)
+        mylog.Logln(file.Name + " {=} " + file.Description)
         return true
     }
 
     // 2. 通过文件的后缀名来识别
     if queryFileSuffixTable(file) {
-        mylog.Logln(file.FileName + " {=} " + file.Description)
+        mylog.Logln(file.Name + " {=} " + file.Description)
         return true
     }
 
     // 3. 可能是压缩文件解压出来的文件
-    isHava, file_name := hasSameNameCompressedFile(file.FileName, allfiles)
+    isHava, file_name := hasSameNameCompressedFile(file.Name, allfiles)
     if isHava {
         file.Score = 0
-        file.Description = fmt.Sprintf("%s {unzip} %s", file_name, file.FileName)
-        mylog.Logln(file.FileName + "{=}" + file.Description)
+        file.Description = fmt.Sprintf("%s {unzip} %s", file_name, file.Name)
+        mylog.Logln(file.Name + "{=}" + file.Description)
         return true
     }
     return false
@@ -181,17 +181,17 @@ func isKnownFile(file *File, allfiles []File) bool {
 //  @param files 查找的范围
 //  @return bool 是否有同名的压缩文件
 //  @return string 同名的压缩文件的名称
-func hasSameNameCompressedFile(name string, files []File) (bool, string) {
+func hasSameNameCompressedFile(name string, files []ExtractedFile) (bool, string) {
     for _, file := range files {
-        basename := strings.TrimSuffix(file.FileName, filepath.Ext(file.FileName))
-        suffixname := filepath.Ext(file.FileName)
+        basename := strings.TrimSuffix(file.Name, filepath.Ext(file.Name))
+        suffixname := filepath.Ext(file.Name)
         if len(suffixname) == 0 {
             continue
         }
         if basename == name {
             for _, suf := range cfg.CompressSuffix {
                 if suf == suffixname {
-                    return true, file.FileName
+                    return true, file.Name
                 }
             }
         }

@@ -1,15 +1,15 @@
 package gobinscan
 
 import (
-    "fmt"
-    "os/exec"
-    "path/filepath"
-    "regexp"
-    "strconv"
-    "strings"
+	"fmt"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
 
-    "github.com/fatih/color"
-    "github.com/neumannlyu/golog"
+	"github.com/fatih/color"
+	"github.com/neumannlyu/golog"
 )
 
 // 分析模块的运行入口，调用这个函数开始分析
@@ -57,15 +57,15 @@ func analysis(rootdir string) {
     elfs := runElfFilter(knownfiles)
     // * 查找数据库
     for _, elffile := range elfs {
-        outinfo := elffile.FileName
-        searchkey, reg := queryBinaryFileList(elffile.FileName)
+        outinfo := elffile.Name
+        searchkey, reg := queryBinaryFileList(elffile.Name)
         if searchkey != "" {
             // 2. 判断版本信息，然后和详细二进制表进行比对，提示是不是原版的文件（或者不在数据库中）
             // Get the version infomation of the binary file
-            v := getBinaryVersion(filepath.Join(elffile.FileDir, elffile.FileName), searchkey, reg)
+            v := getBinaryVersion(filepath.Join(elffile.Dir, elffile.Name), searchkey, reg)
             outinfo += v.ToString()
             // 查找数据库中对应版本的信息
-            md5 := queryBinaryFileDetailInfo(elffile.FileName, v)
+            md5 := queryBinaryFileDetailInfo(elffile.Name, v)
             if md5 != "" {
                 outinfo += " " + md5
             }
@@ -81,17 +81,21 @@ func analysis(rootdir string) {
             l.Info(outinfo)
             // 3. 如果有的话，就去文件漏洞库中查找；没有的话就跳过
             // 在程序漏洞表进行搜索
-            s1, s2, s3, s4, s5, s6, s7 := queryBinaryProgramVulnerability(elffile.FileName)
+            pv := queryBinaryProgramVulnerability(elffile.Name)
+
+            // 添加到result
+            report.Programvulnerablities = append(report.Programvulnerablities, pv)
+
             printf := color.New(color.BgYellow, color.FgRed, color.Bold).PrintfFunc()
             printf("\n%-80s\n%-80s\n%-80s\n%-80s\n%-80s\n%-80s\n%-80s\n%-80s",
                 "!!! Found Vuln Info !!!",
-                fmt.Sprintf("漏洞编号: %s", s1),
-                fmt.Sprintf("漏洞程序: %s", s2),
-                fmt.Sprintf("影响范围: %s", s3),
-                fmt.Sprintf("漏洞类型: %s", s4),
-                fmt.Sprintf("危害程度: %s", s6),
-                fmt.Sprintf("漏洞描述: %s", s5),
-                fmt.Sprintf("修复建议: %s", s7),
+                fmt.Sprintf("漏洞编号: %s", pv.ID),
+                fmt.Sprintf("漏洞程序: %s", pv.TargetOfAttack),
+                fmt.Sprintf("影响范围: %s", pv.AffectedVersion),
+                fmt.Sprintf("漏洞类型: %s", pv.Type),
+                fmt.Sprintf("危害程度: %d", pv.Severity),
+                fmt.Sprintf("漏洞描述: %s", pv.Description),
+                fmt.Sprintf("修复建议: %s", pv.FixSuggestion),
             )
             fmt.Println()
         } else {
@@ -104,7 +108,7 @@ func analysis(rootdir string) {
             l.Log.Bgcolor = color.BgGreen
             l.Log.Fgcolor = color.FgHiCyan
             l.UpdateElement(myunknwon)
-            l.Logln(fmt.Sprintf("%-60s", elffile.FileName))
+            l.Logln(fmt.Sprintf("%-60s", elffile.Name))
         }
     }
 
@@ -113,9 +117,9 @@ func analysis(rootdir string) {
     if len(unknwonElfFiles) > 0 {
         for _, elffile := range unknwonElfFiles {
             printf := color.New(color.Underline, color.Bold, color.FgRed).PrintfFunc()
-            defaultLog.Warn("未知ELF文件:" + elffile.FileName)
+            defaultLog.Warn("未知ELF文件:" + elffile.Name)
             fmt.Println()
-            printf("  文件路径: %s  ", elffile.FileDir)
+            printf("  文件路径: %s  ", elffile.Dir)
             fmt.Println()
             printf("  系统评分: %d  ", elffile.Score)
             fmt.Println()
@@ -129,12 +133,12 @@ func analysis(rootdir string) {
         score := sortedfile[0].Score
         for i := 0; i < len(sortedfile); i++ {
             if score <= sortedfile[i].Score && outlevel > 0 {
-                s := fmt.Sprintf("score=%d filename=%s %s", sortedfile[i].Score, sortedfile[i].FileName, sortedfile[i].Description)
+                s := fmt.Sprintf("score=%d filename=%s %s", sortedfile[i].Score, sortedfile[i].Name, sortedfile[i].Description)
                 defaultLog.Info("优先分析目标：" + s + "\n")
             } else if outlevel > 0 {
                 outlevel = outlevel - 1
                 score = sortedfile[i].Score
-                s := fmt.Sprintf("score=%d filename=%s %s", sortedfile[i].Score, sortedfile[i].FileName, sortedfile[i].Description)
+                s := fmt.Sprintf("score=%d filename=%s %s", sortedfile[i].Score, sortedfile[i].Name, sortedfile[i].Description)
                 defaultLog.Info("优先分析目标：" + s + "\n")
             } else {
                 break
@@ -194,7 +198,7 @@ func getBinaryVersion(filepath, key, reg string) Version {
 }
 
 // 排序
-func Sort(fs []File) (sorted []File) {
+func Sort(fs []ExtractedFile) (sorted []ExtractedFile) {
     for i := 0; i < len(fs); i++ {
         tmp := fs[i]
         for j := 0; j < len(fs); j++ {

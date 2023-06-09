@@ -16,9 +16,15 @@ import (
 var g_bin_file_path string
 var g_bin_extract_dir string
 
+// 日志对象
 var defaultLog golog.Log
 var oKLog golog.Log
+
+// 全局配置对象
 var cfg CFG
+
+// 全局结果对象
+var report Result
 
 func InitConfig(binfile string, loglevel int) *CFG {
     fmt.Println(`
@@ -28,7 +34,7 @@ func InitConfig(binfile string, loglevel int) *CFG {
  ( (  ____  ( ()  () )   \   _/     | |     ) ) ) ) ) )   \___ \  ( (       ( (__) )    ) ) ) ) ) )  
  ( ( (__  ) ( ()  () )   /  _ \     | |    ( ( ( ( ( (        ) ) ( (        )    (    ( ( ( ( ( (   
   \ \__/ /   \ \__/ /   _) (_) )   _| |__  / /  \ \/ /    ___/ /   \ \___   /  /\  \   / /  \ \/ /   
-   \____/     \____/   (______/   /_____( (_/    \__/    /____/     \____) /__(  )__\ (_/    \__/ v0.0.1 bate1   
+   \____/     \____/   (______/   /_____( (_/    \__/    /____/     \____) /__(  )__\ (_/    \__/ v0.0.2   
                                                                             
     `)
 
@@ -53,16 +59,22 @@ func CheckEnv() bool {
         return false
     }
     oKLog.Logln("检查运行环境完成")
-
     return true
 }
 
-func Run() {
+func Run() Result {
+    // 保存固件文件信息
+    report.Binfile.Name = filepath.Base(g_bin_file_path)
+    if abs, err := filepath.Abs(g_bin_file_path); !golog.CheckError(err) {
+        report.Binfile.Dir = filepath.Dir(abs)
+        report.Binfile.Md5 = report.Binfile.getMd5()
+    }
+
     // 1.提取固件
     defaultLog.Info(fmt.Sprintf("[开始提取] %s > %s\n", g_bin_file_path, g_bin_extract_dir))
     if !extract(g_bin_file_path, g_bin_extract_dir) {
         defaultLog.Fatal("提取固件文件失败")
-        return
+        return report
     } else {
         oKLog.Logln("[提取完成] 提取的文件保存在 " + g_bin_extract_dir + " 目录下")
     }
@@ -73,6 +85,8 @@ func Run() {
 
     // 资源回收
     closePostgresDB()
+
+    return report
 }
 
 // 初始化。检查参数和runtime
