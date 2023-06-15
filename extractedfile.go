@@ -1,13 +1,13 @@
 package gobinscan
 
 import (
-    "fmt"
-    "os"
-    "path/filepath"
-    "strings"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 
-    "github.com/fatih/color"
-    "github.com/neumannlyu/golog"
+	"github.com/fatih/color"
+	"github.com/neumannlyu/golog"
 )
 
 const (
@@ -88,7 +88,7 @@ func walkBinExtractedDir(current_path string) (files []ExtractedFile) {
     for _, file := range fs {
         if file.IsDir() {
             // 如果是存放网页相关的就跳过。
-            if isStringArrayContain(strings.ToLower(file.Name()), cfg.SkipDir) {
+            if isStringArrayContain(strings.ToLower(file.Name()), cfg.ScanPolicy.SkipCustomDirs) {
                 continue
             }
 
@@ -97,6 +97,10 @@ func walkBinExtractedDir(current_path string) (files []ExtractedFile) {
                 continue
             }
 
+            // !开启严格扫描策略下，只扫描 squashfs-root和相关的文件夹
+            if !strings.Contains(file.Name(), "squashfs-root") {
+                continue
+            }
             var kf ExtractedFile
             kf.Name = file.Name()
             kf.Dir = current_path

@@ -1,14 +1,14 @@
 package gobinscan
 
 import (
-    "flag"
-    "fmt"
-    "os"
-    "path/filepath"
-    "strings"
+	"flag"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 
-    "github.com/fatih/color"
-    "github.com/neumannlyu/golog"
+	"github.com/fatih/color"
+	"github.com/neumannlyu/golog"
 )
 
 // 需要分析bin文件的路径和提取后存放的目录。
@@ -198,10 +198,10 @@ func checkModule() bool {
 
 // 检查配置文件
 func checkConfig() bool {
-    if cfg.DBHost == "" || cfg.DBName == "" || cfg.DBPassword == "" || cfg.DBUser == "" {
+    if cfg.DB.Host == "" || cfg.DB.Name == "" || cfg.DB.Password == "" || cfg.DB.User == "" {
         return false
     }
-    if len(cfg.SkipDir) == 0 {
+    if len(cfg.ScanPolicy.SkipCustomDirs) == 0 {
         return false
     }
     if len(cfg.CompressSuffix) == 0 {

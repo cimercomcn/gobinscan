@@ -1,13 +1,13 @@
 package gobinscan
 
 import (
-    "database/sql"
-    "fmt"
-    "path/filepath"
-    "strings"
+	"database/sql"
+	"fmt"
+	"path/filepath"
+	"strings"
 
-    _ "github.com/lib/pq"
-    "github.com/neumannlyu/golog"
+	_ "github.com/lib/pq"
+	"github.com/neumannlyu/golog"
 )
 
 // postgres数据库对象
@@ -24,7 +24,9 @@ func openPostgresDB() bool {
     }
 
     var err error
-    g_postgres_db, err = sql.Open("postgres", fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName))
+    g_postgres_db, err = sql.Open("postgres",
+        fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
+            cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.Name))
     return !golog.CheckError(err)
 }
 

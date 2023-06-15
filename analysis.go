@@ -39,7 +39,7 @@ func analysis(rootdir string) {
     // 4. 过滤一些文件类型
     defaultLog.Info("开始过滤文件...\n\n")
     // 过滤1: 如果是别名的文件过滤。（受配置控制）
-    if !cfg.IgnoreAlias {
+    if !cfg.ScanPolicy.IsIgnoreAlias {
         // 忽略
         knownfiles = runAliasFilter(knownfiles)
         unknwonfiles = runAliasFilter(unknwonfiles)
