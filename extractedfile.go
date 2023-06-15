@@ -92,6 +92,11 @@ func walkBinExtractedDir(current_path string) (files []ExtractedFile) {
                 continue
             }
 
+            // 如果以 _开始 .extracted结束，则跳过文件夹
+            if strings.HasPrefix(file.Name(), "_") && strings.HasSuffix(file.Name(), ".extracted") {
+                continue
+            }
+
             var kf ExtractedFile
             kf.Name = file.Name()
             kf.Dir = current_path
