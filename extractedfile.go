@@ -1,13 +1,13 @@
 package gobinscan
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
+    "fmt"
+    "os"
+    "path/filepath"
+    "strings"
 
-	"github.com/fatih/color"
-	"github.com/neumannlyu/golog"
+    "github.com/fatih/color"
+    "github.com/neumannlyu/golog"
 )
 
 const (
@@ -54,8 +54,7 @@ type ExtractedFile struct {
 func scanExtractedFiles(root string) (knownfiles, unknownfiles []ExtractedFile) {
     // 搜索root（一般为释放的目录）下的所有文件。
     // 这里的搜索不是遍历，会根据固件的特性，避免分析某些文件和文件夹
-    allfiles := walkBinExtractedDir(root)
-
+    allfiles := walkBinExtractedDir(root, 1)
     for _, file := range allfiles {
         if isKnownFile(&file, allfiles) {
             knownfiles = append(knownfiles, file)
@@ -77,8 +76,22 @@ func scanExtractedFiles(root string) (knownfiles, unknownfiles []ExtractedFile) 
 // skip file: 以.开头的文件，一般情况下这些文件为无关的隐藏文件。
 //  @param current_path 想要遍历的目录
 //  @return files 文件信息数组
-func walkBinExtractedDir(current_path string) (files []ExtractedFile) {
+func walkBinExtractedDir(current_path string, depth int) (files []ExtractedFile) {
+    var mytag golog.LogLevel
+    mytag.Tag = "SKIP"
+    mytag.Fgcolor = color.FgBlue
+    mytag.Font = color.Underline
+    // 默认日志对象
+    l := NewLog(mytag)
+    l.Log.Bgcolor = color.BgGreen
+    l.Log.Fgcolor = color.FgHiCyan
+    l.UpdateElement(mytag)
+    l.Log.Bgcolor = color.BgWhite
+    l.Log.Fgcolor = color.FgYellow
+
     // 获取指定目录中的所有文件和子目录
+    var total int = 0
+    var skip int = 0
     fs, err := os.ReadDir(current_path)
     if golog.CheckError(err) {
         return
@@ -86,29 +99,41 @@ func walkBinExtractedDir(current_path string) (files []ExtractedFile) {
 
     // 遍历目录中的文件。如果遇到某些文件时，将跳过。
     for _, file := range fs {
+        total++
         if file.IsDir() {
             // 如果是存放网页相关的就跳过。
             if isStringArrayContain(strings.ToLower(file.Name()), cfg.ScanPolicy.SkipCustomDirs) {
+                l.Logln(file.Name())
+                skip++
                 continue
             }
 
             // 如果以 _开始 .extracted结束，则跳过文件夹
             if strings.HasPrefix(file.Name(), "_") && strings.HasSuffix(file.Name(), ".extracted") {
+                l.Logln(file.Name())
+                skip++
                 continue
             }
 
             // !开启严格扫描策略下，只扫描 squashfs-root和相关的文件夹
-            if !strings.Contains(file.Name(), "squashfs-root") {
+            if !strings.Contains(file.Name(), "squashfs-root") && depth == 1 {
+                l.Logln(file.Name())
+                skip++
                 continue
             }
-            var kf ExtractedFile
-            kf.Name = file.Name()
-            kf.Dir = current_path
-            kf.TypeIndex = FILETYPE_DIR // 文件的类别为目录
-            files = append(files, kf)
+
+            // 如果不分析目录
+            if cfg.ScanPolicy.IsAnalysisDir {
+                var kf ExtractedFile
+                kf.Name = file.Name()
+                kf.Dir = current_path
+                kf.TypeIndex = FILETYPE_DIR // 文件的类别为目录
+                files = append(files, kf)
+            }
+
             // 如果是目录，递归遍历该目录
             // fas = file attributes
-            fas := walkBinExtractedDir(filepath.Join(current_path, file.Name()))
+            fas := walkBinExtractedDir(filepath.Join(current_path, file.Name()), depth+1)
             if err != nil {
                 return []ExtractedFile{}
             }
@@ -118,6 +143,7 @@ func walkBinExtractedDir(current_path string) (files []ExtractedFile) {
         } else {
             // 如果以.开头，也跳过
             if strings.HasPrefix(file.Name(), ".") {
+                skip++
                 continue
             }
 
@@ -127,6 +153,7 @@ func walkBinExtractedDir(current_path string) (files []ExtractedFile) {
             kf.Dir = current_path
             kf.TypeIndex = FILECATEGORY_FILE // 文件类别为普通文件
 
+            l.Info(" << " + kf.Name + "\n")
             // 保存结果
             files = append(files, kf)
         }

@@ -1,13 +1,13 @@
 package gobinscan
 
 import (
-	"database/sql"
-	"fmt"
-	"path/filepath"
-	"strings"
+    "database/sql"
+    "fmt"
+    "path/filepath"
+    "strings"
 
-	_ "github.com/lib/pq"
-	"github.com/neumannlyu/golog"
+    _ "github.com/lib/pq"
+    "github.com/neumannlyu/golog"
 )
 
 // postgres数据库对象
@@ -88,6 +88,8 @@ func queryFileSuffixTable(f *ExtractedFile) bool {
         if golog.CheckError(err) {
             defaultLog.Error(err.Error())
             return false
+        } else {
+            return true
         }
     } else {
         // 直接搜后缀名，没发现对应的记录，现在再次尝试在其他位置搜索后缀名

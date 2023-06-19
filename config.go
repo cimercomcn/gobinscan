@@ -23,6 +23,8 @@ type ScanPolicyCFG struct {
     IsSkipExtractedDir bool
     // 是否只扫描squashfs-root目录
     IsOnlySquashfsRoot bool
+    // 是否需要分析目录，默认不分析目录
+    IsAnalysisDir bool
 }
 
 // 使用严格模式。只扫描squashfs-root，跳过所有能跳过的目录
@@ -31,6 +33,7 @@ func (s *ScanPolicyCFG) setStrictMode() {
     s.IsSkipCustomDir = true
     s.IsSkipExtractedDir = true
     s.IsOnlySquashfsRoot = true
+    s.IsAnalysisDir = false
 }
 
 // 使用默认模式。跳过别名，跳过自定义目录，跳过展开目录
@@ -39,6 +42,7 @@ func (s *ScanPolicyCFG) setDefaultMode() {
     s.IsSkipCustomDir = true
     s.IsSkipExtractedDir = true
     s.IsOnlySquashfsRoot = false
+    s.IsAnalysisDir = false
 }
 
 type CFG struct {
