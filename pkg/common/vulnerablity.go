@@ -1,4 +1,4 @@
-package gobinscan
+package common
 
 import (
     "strconv"
@@ -28,7 +28,7 @@ type Vulnerablity struct {
     TargetOfAttack string
 }
 
-func (v *Vulnerablity) isAffected(ver Version) bool {
+func (v *Vulnerablity) IsAffected(ver Version) bool {
     //* 字符串描述版本一般情况分为这几种形式：
     //* (1) (1.2.3,4.5.6)  	存在漏洞在这两个版本之间，不包含1.2.3版本,不包含4.5.6
     //* (2) (1.2.3,4.5.6]  	存在漏洞在这两个版本之间，不包含1.2.3版本,包含4.5.6

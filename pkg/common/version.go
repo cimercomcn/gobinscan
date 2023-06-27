@@ -1,4 +1,4 @@
-package gobinscan
+package common
 
 import (
     "strconv"

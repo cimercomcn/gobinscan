@@ -1,9 +1,8 @@
-package gobinscan
+package common
 
 import (
     "crypto/md5"
     "encoding/hex"
-    "encoding/json"
     "io"
     "os"
     "path/filepath"
@@ -14,10 +13,10 @@ import (
 type BinFileInfo struct {
     Name string
     Dir  string
-    Md5  string
+    MD5  string
 }
 
-func (f BinFileInfo) getMd5() string {
+func (f BinFileInfo) GetMD5() string {
     // 打开要计算 MD5 的文件
     file, err := os.Open(filepath.Join(f.Dir, f.Name))
     if golog.CheckError(err) {
@@ -34,21 +33,4 @@ func (f BinFileInfo) getMd5() string {
 
     // 计算校验和并将其转换为十六进制字符串
     return hex.EncodeToString(hasher.Sum(nil))
-}
-
-type Result struct {
-    Binfile               BinFileInfo
-    KernelVersion         string
-    KernelInfo            string
-    Kernelvulnerablities  []Vulnerablity
-    Programvulnerablities []Vulnerablity
-}
-
-func (r Result) ToJson() string {
-    data, err := json.Marshal(r)
-    if golog.CheckError(err) {
-        return ""
-    }
-
-    return string(data)
 }

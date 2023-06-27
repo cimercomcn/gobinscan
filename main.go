@@ -1,32 +1,33 @@
 package gobinscan
 
 import (
-	"flag"
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
+    "flag"
+    "fmt"
+    "os"
+    "path/filepath"
+    "strings"
 
-	"github.com/fatih/color"
-	"github.com/neumannlyu/golog"
+    "github.com/neumannlyu/gobinscan/pkg/common"
+    "github.com/neumannlyu/gobinscan/pkg/config"
+    "github.com/neumannlyu/gobinscan/pkg/scan"
+    "github.com/neumannlyu/gobinscan/pkg/sql"
+    "github.com/neumannlyu/gobinscan/pkg/tools"
+    "github.com/neumannlyu/golog"
 )
 
-// 需要分析bin文件的路径和提取后存放的目录。
-// 这两个参数都由参数指定。
-var g_bin_file_path string
-var g_bin_extract_dir string
-
-// 日志对象
-var defaultLog golog.Log
-var oKLog golog.Log
-
 // 全局配置对象
-var cfg CFG
+var _cfgPtr *config.CFG
 
-// 全局结果对象
-var report Result
-
-func InitConfig(binfile string, loglevel int) *CFG {
+// first call
+// configuration initial
+func InitConfig(
+    binfile string,
+    databasePlatform string,
+    databaseHost string,
+    databaseUser string,
+    databasePassword string,
+    databaseName string,
+    loglevel int) *config.CFG {
     fmt.Println(`
     _____      ____     ______     _____      __      _    _____     ____     ____        __      _  
    / ___ \    / __ \   (_   _ \   (_   _)    /  \    / )  / ____\   / ___)   (    )      /  \    / ) 
@@ -34,102 +35,64 @@ func InitConfig(binfile string, loglevel int) *CFG {
  ( (  ____  ( ()  () )   \   _/     | |     ) ) ) ) ) )   \___ \  ( (       ( (__) )    ) ) ) ) ) )  
  ( ( (__  ) ( ()  () )   /  _ \     | |    ( ( ( ( ( (        ) ) ( (        )    (    ( ( ( ( ( (   
   \ \__/ /   \ \__/ /   _) (_) )   _| |__  / /  \ \/ /    ___/ /   \ \___   /  /\  \   / /  \ \/ /   
-   \____/     \____/   (______/   /_____( (_/    \__/    /____/     \____) /__(  )__\ (_/    \__/ v0.0.3 beta   
+   \____/     \____/   (______/   /_____( (_/    \__/    /____/     \____) /__(  )__\ (_/    \__/ v0.0.3
                                                                             
     `)
 
-    g_bin_file_path = binfile
+    // 新建一个配置实例
+    _cfgPtr = config.GetConfig()
+    // 设置二进制固件文件的路径。展开后路径也基于这个路径设定。
+    _cfgPtr.BinFile = binfile
+    // 设置数据库信息
+    _cfgPtr.DB.Platform = databasePlatform
+    _cfgPtr.DB.Host = databaseHost
+    _cfgPtr.DB.User = databaseUser
+    _cfgPtr.DB.Password = databasePassword
+    _cfgPtr.DB.Name = databaseName
     // set log level
-    setLogLevel(loglevel)
-    cfg = newConfig()
+    _cfgPtr.SetLogLevel(loglevel)
 
-    defaultLog = NewDefaultLog()
-
-    var ok1 golog.LogLevel
-    ok1.Tag = " OK "
-    ok1.Bgcolor = color.BgGreen
-    oKLog = NewLog(ok1)
-    return &cfg
-}
-
-func CheckEnv() bool {
     // 检查运行环境
     if !checkEnv() {
-        defaultLog.Fatal("检查运行环境失败，运行失败")
-        return false
+        _cfgPtr.Logs.CommonLog.Fatal("检查运行环境失败，运行失败")
+        os.Exit(0)
     }
-    oKLog.Logln("检查运行环境完成")
-    return true
+    _cfgPtr.Logs.OK.Logln("检查运行环境完成")
+
+    return _cfgPtr
 }
 
-func Run() Result {
-    // 保存固件文件信息
-    report.Binfile.Name = filepath.Base(g_bin_file_path)
-    if abs, err := filepath.Abs(g_bin_file_path); !golog.CheckError(err) {
-        report.Binfile.Dir = filepath.Dir(abs)
-        report.Binfile.Md5 = report.Binfile.getMd5()
-    }
-
-    // 1.提取固件
-    defaultLog.Info(fmt.Sprintf("[开始提取] %s > %s\n", g_bin_file_path, g_bin_extract_dir))
-    if !extract(g_bin_file_path, g_bin_extract_dir) {
-        defaultLog.Fatal("提取固件文件失败")
-        return report
-    } else {
-        oKLog.Logln("[提取完成] 提取的文件保存在 " + g_bin_extract_dir + " 目录下")
-    }
-
-    g_bin_extract_dir = filepath.Join(g_bin_extract_dir, "_"+filepath.Base(g_bin_file_path)+".extracted")
-    // 检查固件加密情况
-    if isEncrypted() {
-        defaultLog.Fatal("发现固件被加密，请解密后再尝试分析。\n")
-        return report
-    } else {
-        var mytag golog.LogLevel
-        mytag.Tag = "PASS"
-        mytag.Fgcolor = color.FgGreen
-        mylog := NewLog(mytag)
-        mylog.UpdateElement(mytag)
-        mylog.Logln("固件加密未加密")
-    }
-
-    // 分析
-    defaultLog.Info("\n\n\t\t\t[开始分析固件]\n\n")
-    analysis(g_bin_extract_dir)
-
-    // 资源回收
-    closePostgresDB()
-
-    return report
+func Run() common.Result {
+    return scan.Start()
 }
 
 // 初始化。检查参数和runtime
 // @return bool
 func checkEnv() bool {
     // 初始化。检查参数和run time
-    defaultLog.Info("开始检查运行环境...\n")
+    _cfgPtr.Logs.CommonLog.Info("开始检查运行环境...\n")
 
     // 读取配置文件
-    defaultLog.Info("[1]正在加载配置文件...\n")
+    _cfgPtr.Logs.CommonLog.Info("[1]正在加载配置文件...\n")
     if !checkConfig() {
-        oKLog.Error("配置检查失败")
+        _cfgPtr.Logs.CommonLog.Error("配置检查失败")
         return false
     }
-    oKLog.Logln("加载配置文件完成")
+    _cfgPtr.Logs.OK.Logln("加载配置文件完成")
 
     // 解析命令行参数
-    defaultLog.Info("[2]正在解析命令行参数...\n")
+    _cfgPtr.Logs.CommonLog.Info("[2]正在解析命令行参数...\n")
     if !checkCmdLine() {
-        defaultLog.Fatal("解析命令行参数失败\n")
+        _cfgPtr.Logs.CommonLog.Fatal("解析命令行参数失败\n")
         return false
     }
-    oKLog.Logln("解析命令行参数完成")
+    _cfgPtr.Logs.OK.Logln("解析命令行参数完成")
 
-    defaultLog.Info("[3]正在检查组件...\n")
+    _cfgPtr.Logs.CommonLog.Info("[3]正在检查组件...\n")
     if !checkModule() {
         return false
     }
-    oKLog.Logln("检查组件完成")
+    _cfgPtr.Logs.OK.Logln("检查组件完成")
 
     return true
 }
@@ -137,40 +100,48 @@ func checkEnv() bool {
 // 检查命令行参数的正确性
 func checkCmdLine() bool {
     // check 1: 检查是否输入了bin文件路径，并且文件的后缀名为'.bin'
-    if g_bin_file_path == "" || !strings.HasSuffix(g_bin_file_path, ".bin") {
+    if _cfgPtr.BinFile == "" || !strings.HasSuffix(_cfgPtr.BinFile, ".bin") {
         flag.PrintDefaults()
         return false
     }
 
     // check 2: 检查bin文件是否存在
-    _, err := os.Stat(g_bin_file_path)
+    _, err := os.Stat(_cfgPtr.BinFile)
     if os.IsNotExist(err) {
-        defaultLog.Fatal("bin file does not exist.")
+        _cfgPtr.Logs.CommonLog.Fatal("bin file does not exist.")
         return false
     }
 
     // 如果未指定提取目录则使用当前目录为提取目录
-    if len(g_bin_extract_dir) == 0 {
-        g_bin_extract_dir, _ = os.Getwd()
+    if len(_cfgPtr.BinExtractedDir) == 0 {
+        _cfgPtr.BinExtractedDir, _ = os.Getwd()
         // 移除原有的文件夹
-        if golog.CheckError(os.RemoveAll(filepath.Join(g_bin_extract_dir, "_"+filepath.Base(g_bin_file_path)+".extracted"))) {
+        if golog.CheckError(os.RemoveAll(
+            filepath.Join(_cfgPtr.BinExtractedDir,
+                "_"+filepath.Base(_cfgPtr.BinFile)+".extracted"))) {
             return false
         }
     } else { // 指定提取目录
         // 检查指定提取目录是否存在
-        if _, err := os.Stat(g_bin_extract_dir); os.IsNotExist(err) {
-            defaultLog.Fatal(fmt.Sprintf("Extracted directory %s does not exist.", g_bin_extract_dir))
+        if _, err := os.Stat(_cfgPtr.BinExtractedDir); os.IsNotExist(err) {
+            _cfgPtr.Logs.CommonLog.Fatal(
+                fmt.Sprintf("Extracted directory %s does not exist.",
+                    _cfgPtr.BinExtractedDir))
             return false
         }
 
         // 目录存在
-        files, err := os.ReadDir(g_bin_extract_dir)
+        files, err := os.ReadDir(_cfgPtr.BinExtractedDir)
         if err != nil {
-            defaultLog.Fatal(fmt.Sprintf("Error reading directory %s: %v", g_bin_extract_dir, err))
+            _cfgPtr.Logs.CommonLog.Fatal(
+                fmt.Sprintf("Error reading directory %s: %v",
+                    _cfgPtr.BinExtractedDir, err))
             return false
         }
         if len(files) != 0 {
-            defaultLog.Fatal(fmt.Sprintf("Extracted directory %s is not empty.\n", g_bin_extract_dir))
+            _cfgPtr.Logs.CommonLog.Fatal(
+                fmt.Sprintf("Extracted directory %s is not empty.\n",
+                    _cfgPtr.BinExtractedDir))
             return false
         }
     }
@@ -180,31 +151,60 @@ func checkCmdLine() bool {
 // 检查必要组件是否已经安装
 func checkModule() bool {
     // 1. 检查binwalk是否已经安装
-    if isInstalledBinwalk() {
-        oKLog.Logln("binwalk")
+    if tools.IsInstalledBinwalk() {
+        _cfgPtr.Logs.OK.Logln("binwalk")
     } else {
-        defaultLog.Fatal("binwalk is not installed")
+        _cfgPtr.Logs.CommonLog.Fatal("binwalk is not installed")
         return false
     }
 
     // 2. 检查数据库连接
-    if openPostgresDB() {
-        oKLog.Logln("连接数据库")
-    } else {
-        defaultLog.Fatal("连接数据库失败")
+    switch _cfgPtr.DB.Platform {
+    case "postgresql":
+        sql.Isql = &sql.PostgresSQL{
+            DBPtr: nil,
+        }
+        // 打开数据库
+        if !sql.Isql.Open(
+            _cfgPtr.DB.Host,
+            _cfgPtr.DB.User,
+            _cfgPtr.DB.Password,
+            _cfgPtr.DB.Name) {
+            _cfgPtr.Logs.CommonLog.Fatal("连接数据库失败")
+            return false
+        }
+    case "mysql":
+        sql.Isql = &sql.MySQL{
+            DBPtr: nil,
+        }
+        // 打开数据库
+        if !sql.Isql.Open(
+            _cfgPtr.DB.Host,
+            _cfgPtr.DB.User,
+            _cfgPtr.DB.Password,
+            _cfgPtr.DB.Name) {
+            _cfgPtr.Logs.CommonLog.Fatal("连接数据库失败")
+            return false
+        }
+    default:
+        _cfgPtr.Logs.CommonLog.Fatal("No Suppoted Platform!!!")
+        return false
     }
+
+    _cfgPtr.Logs.OK.Logln("连接数据库")
     return true
 }
 
 // 检查配置文件
 func checkConfig() bool {
-    if cfg.DB.Host == "" || cfg.DB.Name == "" || cfg.DB.Password == "" || cfg.DB.User == "" {
+    if _cfgPtr.DB.Host == "" || _cfgPtr.DB.Name == "" ||
+        _cfgPtr.DB.Password == "" || _cfgPtr.DB.User == "" {
         return false
     }
-    if len(cfg.ScanPolicy.SkipCustomDirs) == 0 {
+    if len(_cfgPtr.ScanPolicy.SkipCustomDirs) == 0 {
         return false
     }
-    if len(cfg.CompressSuffix) == 0 {
+    if len(_cfgPtr.CompressSuffix) == 0 {
         return false
     }
     return true
