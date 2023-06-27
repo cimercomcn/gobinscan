@@ -61,11 +61,8 @@ func (exfile *ExtractedFile) GetBinaryVersion() error {
 
         for _, line := range lines {
             re := regexp.MustCompile(exfile.VersionSearchRegular)
-            fmt.Printf("exfile.VersionSearchRegular: %v\n", exfile.VersionSearchRegular)
-            fmt.Printf("line: %v\n", line)
             // 判断字符串是否匹配正则表达式
             if re.MatchString(line) {
-                fmt.Printf("re.FindStringSubmatch(line): %v\n", re.FindStringSubmatch(line))
                 // 提取捕获组中的 x.y.z
                 matches := re.FindStringSubmatch(line)[1:]
                 if len(matches) == 2 {

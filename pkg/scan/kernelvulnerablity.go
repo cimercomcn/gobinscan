@@ -8,9 +8,9 @@ import (
     "strconv"
     "strings"
 
+    "172.16.2.38/neumannlyu/gobinscan/pkg/common"
+    "172.16.2.38/neumannlyu/gobinscan/pkg/sql"
     "github.com/fatih/color"
-    "github.com/neumannlyu/gobinscan/pkg/common"
-    "github.com/neumannlyu/gobinscan/pkg/sql"
     "github.com/neumannlyu/golog"
 )
 
@@ -56,7 +56,8 @@ func scanKernelVulnerability(root string) bool {
 // 获取Linux内核版本信息。同时会更新Reuslt
 // 在binwalk解包的路径下执行 strings * | grep Linux version 命令。
 func getKernelInfo(current_dir string) (common.Version, error) {
-    cmd1 := exec.Command("sh", "-c", fmt.Sprintf("cd %s && strings *", current_dir))
+    cmd1 := exec.Command("sh", "-c",
+        fmt.Sprintf("cd %s && strings *", current_dir))
     cmd2 := exec.Command("grep", "Linux version")
 
     pipe, err := cmd1.StdoutPipe()

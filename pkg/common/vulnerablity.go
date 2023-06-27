@@ -36,7 +36,9 @@ func (v *Vulnerablity) IsAffected(ver Version) bool {
     //* (4) 1.2.3  			漏洞只存在版本1.2.3上
 
     // ! 只存在某个版本的情况
-    if len(v.AffectedVersion) > 0 && v.AffectedVersion[0] != '(' && v.AffectedVersion[0] != '[' {
+    if len(v.AffectedVersion) > 0 &&
+        v.AffectedVersion[0] != '(' &&
+        v.AffectedVersion[0] != '[' {
         // 此时只需要比较两个版本号是否一致即可
         ps := strings.Split(v.AffectedVersion, ".")
         var tmp Version
@@ -62,7 +64,9 @@ func (v *Vulnerablity) IsAffected(ver Version) bool {
         isIncludeRight = true
     }
     // 删除原有的()[]
-    affected_str := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(v.AffectedVersion, "(", ""), ")", ""), "[", ""), "]", "")
+    affected_str := strings.ReplaceAll(strings.ReplaceAll(
+        strings.ReplaceAll(strings.ReplaceAll(
+            v.AffectedVersion, "(", ""), ")", ""), "[", ""), "]", "")
 
     // 按照,进行分割
     parts := strings.Split(affected_str, ",")

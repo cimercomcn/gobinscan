@@ -92,11 +92,13 @@ func GetConfig() *CFG {
         configInstance.Logs.applyDefault()
 
         // ScanPolicy 设置扫描策略
-        configInstance.ScanPolicy.SkipCustomDirs = append(configInstance.ScanPolicy.SkipCustomDirs, "web", "html")
+        configInstance.ScanPolicy.SkipCustomDirs =
+            append(configInstance.ScanPolicy.SkipCustomDirs, "web", "html")
         configInstance.ScanPolicy.setStrictMode()
 
         // 常用的压缩文件后缀名
-        configInstance.CompressSuffix = append(configInstance.CompressSuffix, ".xz", ".zip", ".7z")
+        configInstance.CompressSuffix =
+            append(configInstance.CompressSuffix, ".xz", ".zip", ".7z")
 
         // 校验出不同类型的elf
         configInstance.AddRatingCheckElf = 5

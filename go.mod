@@ -1,4 +1,4 @@
-module github.com/neumannlyu/gobinscan
+module 172.16.2.38/neumannlyu/gobinscan
 
 go 1.20
 

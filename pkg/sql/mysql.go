@@ -7,8 +7,8 @@ import (
     "path/filepath"
     "strings"
 
+    "172.16.2.38/neumannlyu/gobinscan/pkg/common"
     _ "github.com/go-sql-driver/mysql"
-    "github.com/neumannlyu/gobinscan/pkg/common"
     "github.com/neumannlyu/golog"
 )
 

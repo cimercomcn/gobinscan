@@ -1,6 +1,6 @@
 package sql
 
-import "github.com/neumannlyu/gobinscan/pkg/common"
+import "172.16.2.38/neumannlyu/gobinscan/pkg/common"
 
 type ISQL interface {
     // 打开数据库连接
@@ -35,10 +35,4 @@ type ISQL interface {
 
     // 搜索符合条件的程序漏洞
     SearchProgramVulnerabilityTable(common.ExtractedFile) []common.Vulnerablity
-    // // GetDB() *sql.DB
-    // // 执行表达式
-    // Execute(exp string) bool
-
-    // // 从CVS文件中导入数据
-    // ImportFromCVS(tableName, cvsFile string) int
 }

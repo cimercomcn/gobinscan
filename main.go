@@ -7,11 +7,11 @@ import (
     "path/filepath"
     "strings"
 
-    "github.com/neumannlyu/gobinscan/pkg/common"
-    "github.com/neumannlyu/gobinscan/pkg/config"
-    "github.com/neumannlyu/gobinscan/pkg/scan"
-    "github.com/neumannlyu/gobinscan/pkg/sql"
-    "github.com/neumannlyu/gobinscan/pkg/tools"
+    "172.16.2.38/neumannlyu/gobinscan/pkg/common"
+    "172.16.2.38/neumannlyu/gobinscan/pkg/config"
+    "172.16.2.38/neumannlyu/gobinscan/pkg/scan"
+    "172.16.2.38/neumannlyu/gobinscan/pkg/sql"
+    "172.16.2.38/neumannlyu/gobinscan/pkg/tools"
     "github.com/neumannlyu/golog"
 )
 
@@ -62,7 +62,7 @@ func InitConfig(
     return _cfgPtr
 }
 
-func Run() common.Result {
+func Run() common.Report {
     return scan.Start()
 }
 

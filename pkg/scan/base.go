@@ -1,12 +1,12 @@
 package scan
 
 import (
-    "github.com/neumannlyu/gobinscan/pkg/common"
-    "github.com/neumannlyu/gobinscan/pkg/config"
+	"172.16.2.38/neumannlyu/gobinscan/pkg/common"
+	"172.16.2.38/neumannlyu/gobinscan/pkg/config"
 )
 
 var _cfgPtr *config.CFG
-var _report common.Result
+var _report common.Report
 var _knownElfFile []common.ExtractedFile
 
 // 导入模块时运行

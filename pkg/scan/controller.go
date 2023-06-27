@@ -1,18 +1,18 @@
 package scan
 
 import (
-    "fmt"
-    "os"
-    "path/filepath"
+	"fmt"
+	"os"
+	"path/filepath"
 
-    "github.com/neumannlyu/gobinscan/pkg/common"
-    "github.com/neumannlyu/gobinscan/pkg/sql"
-    "github.com/neumannlyu/gobinscan/pkg/tools"
-    "github.com/neumannlyu/golog"
+	"172.16.2.38/neumannlyu/gobinscan/pkg/common"
+	"172.16.2.38/neumannlyu/gobinscan/pkg/sql"
+	"172.16.2.38/neumannlyu/gobinscan/pkg/tools"
+	"github.com/neumannlyu/golog"
 )
 
 // 扫描从这里开始
-func Start() common.Result {
+func Start() common.Report {
 
     // 保存固件文件信息
     _report.Binfile.Name = filepath.Base(_cfgPtr.BinFile)

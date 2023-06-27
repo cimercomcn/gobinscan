@@ -1,12 +1,13 @@
 package common
 
 import (
-	"encoding/json"
+    "encoding/json"
 
-	"github.com/neumannlyu/golog"
+    "github.com/neumannlyu/golog"
 )
 
-type Result struct {
+// 最终报告结构体
+type Report struct {
     Binfile               BinFileInfo
     KernelVersion         string
     KernelInfo            string
@@ -14,7 +15,7 @@ type Result struct {
     Programvulnerablities []Vulnerablity
 }
 
-func (r Result) ToJson() string {
+func (r Report) ToJson() string {
     data, err := json.Marshal(r)
     if golog.CheckError(err) {
         return ""
