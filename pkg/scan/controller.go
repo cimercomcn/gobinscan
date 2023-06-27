@@ -2,13 +2,14 @@ package scan
 
 import (
     "fmt"
-    "gobinscan/pkg/common"
-    "gobinscan/pkg/tools"
+
+    "github.com/neumannlyu/gobinscan/pkg/sql"
+
     "os"
     "path/filepath"
 
-    "gobinscan/pkg/sql"
-
+    "github.com/neumannlyu/gobinscan/pkg/common"
+    "github.com/neumannlyu/gobinscan/pkg/tools"
     "github.com/neumannlyu/golog"
 )
 

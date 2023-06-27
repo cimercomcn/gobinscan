@@ -4,11 +4,11 @@ import (
     "database/sql"
     "errors"
     "fmt"
-    "gobinscan/pkg/common"
     "path/filepath"
     "strings"
 
     _ "github.com/go-sql-driver/mysql"
+    "github.com/neumannlyu/gobinscan/pkg/common"
     "github.com/neumannlyu/golog"
 )
 

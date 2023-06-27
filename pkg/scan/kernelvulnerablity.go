@@ -3,14 +3,14 @@ package scan
 import (
     "errors"
     "fmt"
-    "gobinscan/pkg/common"
-    "gobinscan/pkg/sql"
     "os/exec"
     "regexp"
     "strconv"
     "strings"
 
     "github.com/fatih/color"
+    "github.com/neumannlyu/gobinscan/pkg/common"
+    "github.com/neumannlyu/gobinscan/pkg/sql"
     "github.com/neumannlyu/golog"
 )
 

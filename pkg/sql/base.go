@@ -1,6 +1,6 @@
 package sql
 
-import "gobinscan/pkg/config"
+import "github.com/neumannlyu/gobinscan/pkg/config"
 
 var _cfgPtr *config.CFG
 
