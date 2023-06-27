@@ -1,4 +1,4 @@
-module 172.16.2.38/neumannlyu/gobinscan
+module gobinscan
 
 go 1.20
 

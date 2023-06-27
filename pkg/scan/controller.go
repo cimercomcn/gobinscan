@@ -1,14 +1,15 @@
 package scan
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
+    "fmt"
+    "gobinscan/pkg/common"
+    "gobinscan/pkg/tools"
+    "os"
+    "path/filepath"
 
-	"172.16.2.38/neumannlyu/gobinscan/pkg/common"
-	"172.16.2.38/neumannlyu/gobinscan/pkg/sql"
-	"172.16.2.38/neumannlyu/gobinscan/pkg/tools"
-	"github.com/neumannlyu/golog"
+    "gobinscan/pkg/sql"
+
+    "github.com/neumannlyu/golog"
 )
 
 // 扫描从这里开始

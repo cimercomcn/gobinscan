@@ -3,13 +3,13 @@ package scan
 import (
     "errors"
     "fmt"
+    "gobinscan/pkg/common"
+    "gobinscan/pkg/sql"
     "os/exec"
     "regexp"
     "strconv"
     "strings"
 
-    "172.16.2.38/neumannlyu/gobinscan/pkg/common"
-    "172.16.2.38/neumannlyu/gobinscan/pkg/sql"
     "github.com/fatih/color"
     "github.com/neumannlyu/golog"
 )

@@ -2,12 +2,12 @@ package scan
 
 import (
     "fmt"
+    "gobinscan/pkg/common"
+    "gobinscan/pkg/sql"
     "os"
     "path/filepath"
     "strings"
 
-    "172.16.2.38/neumannlyu/gobinscan/pkg/common"
-    "172.16.2.38/neumannlyu/gobinscan/pkg/sql"
     "github.com/neumannlyu/golog"
 )
 

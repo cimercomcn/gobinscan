@@ -3,15 +3,15 @@ package gobinscan
 import (
     "flag"
     "fmt"
+    "gobinscan/pkg/common"
+    "gobinscan/pkg/config"
+    "gobinscan/pkg/scan"
+    "gobinscan/pkg/sql"
+    "gobinscan/pkg/tools"
     "os"
     "path/filepath"
     "strings"
 
-    "172.16.2.38/neumannlyu/gobinscan/pkg/common"
-    "172.16.2.38/neumannlyu/gobinscan/pkg/config"
-    "172.16.2.38/neumannlyu/gobinscan/pkg/scan"
-    "172.16.2.38/neumannlyu/gobinscan/pkg/sql"
-    "172.16.2.38/neumannlyu/gobinscan/pkg/tools"
     "github.com/neumannlyu/golog"
 )
 
