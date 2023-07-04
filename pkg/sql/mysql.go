@@ -7,8 +7,8 @@ import (
     "path/filepath"
     "strings"
 
+    "github.com/cimercomcn/gobinscan/pkg/common"
     _ "github.com/go-sql-driver/mysql"
-    "github.com/neumannlyu/gobinscan/pkg/common"
     "github.com/neumannlyu/golog"
 )
 
@@ -25,7 +25,7 @@ func (mysql *MySQL) Open(h, u, p, d string) bool {
     db, err := sql.Open("mysql",
         //"user:password@tcp(host:port)/dbname"
         fmt.Sprintf("%s:%s@tcp(%s)/%s", u, p, h, d))
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         _cfgPtr.Logs.CommonLog.Fatal(
             fmt.Sprintf("open MySQL failed err.Error(): %v\n",
                 err.Error()))
@@ -53,7 +53,7 @@ func (mysql *MySQL) IsKnownFileByName(exfile *common.ExtractedFile) bool {
     rows, err := mysql.DBPtr.Query(
         "SELECT file_name,flag,rating,count,description FROM known_file_table" +
             " where file_name='" + exfile.Name + "'")
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         _cfgPtr.Logs.CommonLog.Error(err.Error())
         return false
     }
@@ -66,7 +66,7 @@ func (mysql *MySQL) IsKnownFileByName(exfile *common.ExtractedFile) bool {
             &exfile.Rating,
             &exfile.Count,
             &exfile.Description)
-        if golog.CheckError(err) {
+        if golog.CatchError(err) {
             _cfgPtr.Logs.CommonLog.Error(err.Error())
             return false
         } else {
@@ -83,7 +83,7 @@ func (mysql *MySQL) IsKnownFileByType(exfile *common.ExtractedFile) bool {
     rows, err := mysql.DBPtr.Query(
         "SELECT flag, rating, description FROM file_type_table" +
             " where suffix_name='" + filepath.Ext(exfile.Name) + "'")
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         _cfgPtr.Logs.CommonLog.Error(err.Error())
         return false
     }
@@ -100,7 +100,7 @@ func (mysql *MySQL) IsKnownFileByType(exfile *common.ExtractedFile) bool {
             &exfile.Flag,
             &exfile.Rating,
             &exfile.Description)
-        if golog.CheckError(err) {
+        if golog.CatchError(err) {
             _cfgPtr.Logs.CommonLog.Error(err.Error())
             return false
         } else {
@@ -118,7 +118,7 @@ func (mysql *MySQL) IsKnownFileByType(exfile *common.ExtractedFile) bool {
             results, err := mysql.DBPtr.Query(
                 "SELECT flag, rating,description FROM file_type_table " +
                     "where suffix_name='." + parts[i] + ".$${version}$$'")
-            if golog.CheckError(err) {
+            if golog.CatchError(err) {
                 _cfgPtr.Logs.CommonLog.Error(err.Error())
                 return false
             }
@@ -129,7 +129,7 @@ func (mysql *MySQL) IsKnownFileByType(exfile *common.ExtractedFile) bool {
                     &exfile.Flag,
                     &exfile.Rating,
                     &exfile.Description)
-                if golog.CheckError(err) {
+                if golog.CatchError(err) {
                     _cfgPtr.Logs.CommonLog.Error(err.Error())
                     return false
                 }
@@ -180,13 +180,13 @@ func (mysql *MySQL) GetProgramVulnerabilities(
     rows, err := mysql.DBPtr.Query(
         "SELECT ver_search_key, regular FROM program_table " +
             "where file_name='" + exfile.Name + "'")
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         return nil, err
     }
     defer rows.Close()
 
     for rows.Next() {
-        if golog.CheckError(
+        if golog.CatchError(
             rows.Scan(
                 &exfile.VersionSearchKey,
                 &exfile.VersionSearchRegular)) {
@@ -196,7 +196,7 @@ func (mysql *MySQL) GetProgramVulnerabilities(
         // 2. 判断版本信息，然后和详细二进制表进行比对，
         // 提示是不是原版的文件（或者不在数据库中）
         // Get the version infomation of the binary file
-        if err := exfile.GetBinaryVersion(); golog.CheckError(err) {
+        if err := exfile.GetBinaryVersion(); golog.CatchError(err) {
             _cfgPtr.Logs.CommonLog.Error(err.Error())
             continue
         }
@@ -216,7 +216,7 @@ func (mysql *MySQL) SearchProgramVulnerabilityTable(
         "SELECT vid, file_name, affected_ver, vtype, vdescription, severity," +
             " fix_suggestion FROM program_vulnerability_table " +
             "where file_name='" + exfile.Name + "'")
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         _cfgPtr.Logs.CommonLog.Error(err.Error())
         return nil
     }
@@ -226,7 +226,7 @@ func (mysql *MySQL) SearchProgramVulnerabilityTable(
         var vuln common.Vulnerablity
         // id ,vid ,file_name , affected_ver  vtype TEXT,
         // vdescription TEXT, severity INT, fix_suggestion
-        if !golog.CheckError(
+        if !golog.CatchError(
             rows.Scan(
                 &vuln.ID,
                 &vuln.TargetOfAttack,

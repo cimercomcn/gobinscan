@@ -7,11 +7,11 @@ import (
     "path/filepath"
     "strings"
 
-    "github.com/neumannlyu/gobinscan/pkg/common"
-    "github.com/neumannlyu/gobinscan/pkg/config"
-    "github.com/neumannlyu/gobinscan/pkg/scan"
-    "github.com/neumannlyu/gobinscan/pkg/sql"
-    "github.com/neumannlyu/gobinscan/pkg/tools"
+    "github.com/cimercomcn/gobinscan/pkg/common"
+    "github.com/cimercomcn/gobinscan/pkg/config"
+    "github.com/cimercomcn/gobinscan/pkg/scan"
+    "github.com/cimercomcn/gobinscan/pkg/sql"
+    "github.com/cimercomcn/gobinscan/pkg/tools"
     "github.com/neumannlyu/golog"
 )
 
@@ -35,7 +35,7 @@ func InitConfig(
  ( (  ____  ( ()  () )   \   _/     | |     ) ) ) ) ) )   \___ \  ( (       ( (__) )    ) ) ) ) ) )  
  ( ( (__  ) ( ()  () )   /  _ \     | |    ( ( ( ( ( (        ) ) ( (        )    (    ( ( ( ( ( (   
   \ \__/ /   \ \__/ /   _) (_) )   _| |__  / /  \ \/ /    ___/ /   \ \___   /  /\  \   / /  \ \/ /   
-   \____/     \____/   (______/   /_____( (_/    \__/    /____/     \____) /__(  )__\ (_/    \__/ v0.0.3
+   \____/     \____/   (______/   /_____( (_/    \__/    /____/     \____) /__(  )__\ (_/    \__/ v0.0.5Beta
                                                                             
     `)
 
@@ -50,7 +50,7 @@ func InitConfig(
     _cfgPtr.DB.Password = databasePassword
     _cfgPtr.DB.Name = databaseName
     // set log level
-    _cfgPtr.SetLogLevel(loglevel)
+    golog.SetLogLevel(loglevel)
 
     // 检查运行环境
     if !checkEnv() {
@@ -116,7 +116,7 @@ func checkCmdLine() bool {
     if len(_cfgPtr.BinExtractedDir) == 0 {
         _cfgPtr.BinExtractedDir, _ = os.Getwd()
         // 移除原有的文件夹
-        if golog.CheckError(os.RemoveAll(
+        if golog.CatchError(os.RemoveAll(
             filepath.Join(_cfgPtr.BinExtractedDir,
                 "_"+filepath.Base(_cfgPtr.BinFile)+".extracted"))) {
             return false

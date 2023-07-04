@@ -8,9 +8,9 @@ import (
     "strconv"
     "strings"
 
+    "github.com/cimercomcn/gobinscan/pkg/common"
+    "github.com/cimercomcn/gobinscan/pkg/sql"
     "github.com/fatih/color"
-    "github.com/neumannlyu/gobinscan/pkg/common"
-    "github.com/neumannlyu/gobinscan/pkg/sql"
     "github.com/neumannlyu/golog"
 )
 
@@ -19,7 +19,7 @@ import (
 func scanKernelVulnerability(root string) bool {
     // 获取固件中的内核信息，同时会更新报告
     lki, err := getKernelInfo(root)
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         return false
     }
 
@@ -48,8 +48,9 @@ func scanKernelVulnerability(root string) bool {
     color.New(color.BgYellow, color.FgRed, color.Bold).Printf(
         "                                                 "+
             "共发现%d/%d个内核漏洞"+
-            "                                                 \n",
+            "                                                 ",
         vulCount, len(kvs))
+    fmt.Println()
     return true
 }
 

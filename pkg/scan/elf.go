@@ -24,14 +24,14 @@ func isElf(filepath string) (bool, error) {
 
     // 尝试打开文件
     file, err := os.Open(filepath)
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         return false, err
     }
     defer file.Close()
 
     // 获取文件的类型
     kind, err := filetype.MatchReader(file)
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         return false, err
     }
 

@@ -7,8 +7,8 @@ import (
     "path/filepath"
     "strings"
 
+    "github.com/cimercomcn/gobinscan/pkg/common"
     _ "github.com/lib/pq"
-    "github.com/neumannlyu/gobinscan/pkg/common"
     "github.com/neumannlyu/golog"
 )
 
@@ -28,7 +28,7 @@ func (pg *PostgresSQL) Open(h, u, p, d string) bool {
     db, err := sql.Open("postgres",
         fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
             h, u, p, d))
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         _cfgPtr.Logs.CommonLog.Fatal(
             fmt.Sprintf("open PostgresSQL failed err.Error(): %v\n",
                 err.Error()))
@@ -56,7 +56,7 @@ func (pg *PostgresSQL) IsKnownFileByName(exfile *common.ExtractedFile) bool {
     rows, err := pg.DBPtr.Query(
         "SELECT file_name,flag,rating,count,description FROM known_file_table" +
             " where file_name='" + exfile.Name + "'")
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         _cfgPtr.Logs.CommonLog.Error(err.Error())
         return false
     }
@@ -69,7 +69,7 @@ func (pg *PostgresSQL) IsKnownFileByName(exfile *common.ExtractedFile) bool {
             &exfile.Rating,
             &exfile.Count,
             &exfile.Description)
-        if golog.CheckError(err) {
+        if golog.CatchError(err) {
             _cfgPtr.Logs.CommonLog.Error(err.Error())
             return false
         } else {
@@ -86,7 +86,7 @@ func (pg *PostgresSQL) IsKnownFileByType(exfile *common.ExtractedFile) bool {
     rows, err := pg.DBPtr.Query(
         "SELECT flag, rating, description FROM file_type_table" +
             " where suffix_name='" + filepath.Ext(exfile.Name) + "'")
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         _cfgPtr.Logs.CommonLog.Error(err.Error())
         return false
     }
@@ -103,7 +103,7 @@ func (pg *PostgresSQL) IsKnownFileByType(exfile *common.ExtractedFile) bool {
             &exfile.Flag,
             &exfile.Rating,
             &exfile.Description)
-        if golog.CheckError(err) {
+        if golog.CatchError(err) {
             _cfgPtr.Logs.CommonLog.Error(err.Error())
             return false
         } else {
@@ -121,7 +121,7 @@ func (pg *PostgresSQL) IsKnownFileByType(exfile *common.ExtractedFile) bool {
             results, err := pg.DBPtr.Query(
                 "SELECT flag, rating,description FROM file_type_table " +
                     "where suffix_name='." + parts[i] + ".$${version}$$'")
-            if golog.CheckError(err) {
+            if golog.CatchError(err) {
                 _cfgPtr.Logs.CommonLog.Error(err.Error())
                 return false
             }
@@ -132,7 +132,7 @@ func (pg *PostgresSQL) IsKnownFileByType(exfile *common.ExtractedFile) bool {
                     &exfile.Flag,
                     &exfile.Rating,
                     &exfile.Description)
-                if golog.CheckError(err) {
+                if golog.CatchError(err) {
                     _cfgPtr.Logs.CommonLog.Error(err.Error())
                     return false
                 }
@@ -183,13 +183,13 @@ func (pg *PostgresSQL) GetProgramVulnerabilities(
     rows, err := pg.DBPtr.Query(
         "SELECT ver_search_key, regular FROM program_table " +
             "where file_name='" + exfile.Name + "'")
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         return nil, err
     }
     defer rows.Close()
 
     for rows.Next() {
-        if golog.CheckError(
+        if golog.CatchError(
             rows.Scan(
                 &exfile.VersionSearchKey,
                 &exfile.VersionSearchRegular)) {
@@ -199,7 +199,7 @@ func (pg *PostgresSQL) GetProgramVulnerabilities(
         // 2. 判断版本信息，然后和详细二进制表进行比对，
         // 提示是不是原版的文件（或者不在数据库中）
         // Get the version infomation of the binary file
-        if err := exfile.GetBinaryVersion(); golog.CheckError(err) {
+        if err := exfile.GetBinaryVersion(); golog.CatchError(err) {
             _cfgPtr.Logs.CommonLog.Error(err.Error())
             continue
         }
@@ -219,7 +219,7 @@ func (pg *PostgresSQL) SearchProgramVulnerabilityTable(
         "SELECT vid, file_name, affected_ver, vtype, vdescription, severity," +
             " fix_suggestion FROM program_vulnerability_table " +
             "where file_name='" + exfile.Name + "'")
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         _cfgPtr.Logs.CommonLog.Error(err.Error())
         return nil
     }
@@ -229,7 +229,7 @@ func (pg *PostgresSQL) SearchProgramVulnerabilityTable(
         var vuln common.Vulnerablity
         // id ,vid ,file_name , affected_ver  vtype TEXT,
         // vdescription TEXT, severity INT, fix_suggestion
-        if !golog.CheckError(
+        if !golog.CatchError(
             rows.Scan(
                 &vuln.ID,
                 &vuln.TargetOfAttack,

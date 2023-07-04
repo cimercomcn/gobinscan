@@ -1,6 +1,6 @@
 package sql
 
-import "github.com/neumannlyu/gobinscan/pkg/common"
+import "github.com/cimercomcn/gobinscan/pkg/common"
 
 type ISQL interface {
     // 打开数据库连接

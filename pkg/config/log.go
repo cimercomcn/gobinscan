@@ -25,62 +25,57 @@ type LogSet struct {
     Skip golog.SimpleLog
     // Tag: [UNKNOWN] Fg
     Unknwon   golog.SimpleLog
-    CommonLog golog.Log
+    CommonLog golog.CommonLog
 }
 
 func (ls *LogSet) applyDefault() {
+    golog.UnifiedLogData.Fgcolor = color.FgGreen
+    golog.UnifiedLogData.FormatString = "[" +
+        golog.UnifiedLogData.FormatString + "]"
+
     // OK
     ls.OK = golog.NewSimpleLog()
     ls.OK.Tag.Fgcolor = color.FgGreen
     ls.OK.Tag.Bgcolor = 0
-    ls.OK.Tag.Tag = " OK "
-    ls.OK.FormatString = "&DT &TAG "
+    ls.OK.Tag.FormatString = " OK "
+    ls.OK.FormatString = golog.UnifiedLogFormatString
     // OK2
     ls.OK2 = golog.NewSimpleLog()
     ls.OK2.Tag.Fgcolor = color.FgHiBlue
     ls.OK2.Tag.Bgcolor = 0
     ls.OK2.Tag.Font = color.Underline
-    ls.OK2.Tag.Tag = "   OK    "
-    ls.OK2.FormatString = "&DT &TAG "
+    ls.OK2.Tag.FormatString = "      OK "
+    ls.OK2.FormatString = "                     "
     // Pass
     ls.Pass = golog.NewSimpleLog()
     ls.Pass.Tag.Fgcolor = color.FgGreen
     ls.Pass.Tag.Bgcolor = 0
-    ls.Pass.Tag.Tag = "PASS"
-    ls.Pass.FormatString = "&DT &TAG "
+    ls.Pass.Tag.FormatString = "PASS"
+    ls.Pass.FormatString = golog.UnifiedLogFormatString
     // Ignored
     ls.Ignored = golog.NewSimpleLog()
     ls.Ignored.Tag.Fgcolor = color.FgGreen
     ls.Ignored.Tag.Bgcolor = 0
-    ls.Ignored.Tag.Tag = "IGNORED"
+    ls.Ignored.Tag.FormatString = "IGNORED"
     ls.Ignored.Tag.Font = color.Underline
-    ls.Ignored.FormatString = "&DT &TAG "
+    ls.Ignored.FormatString = golog.UnifiedLogFormatString
     // Skip
     ls.Skip = golog.NewSimpleLog()
     ls.Skip.Tag.Fgcolor = color.FgBlue
     ls.Skip.Tag.Bgcolor = 0
-    ls.Skip.Tag.Tag = "SKIP"
+    ls.Skip.Tag.FormatString = "SKIP"
     ls.Skip.Tag.Font = color.Underline
     ls.Skip.Msg.Bgcolor = color.BgWhite
     ls.Skip.Msg.Fgcolor = color.FgYellow
-    ls.Skip.FormatString = "&DT &TAG "
+    ls.Skip.FormatString = golog.UnifiedLogFormatString
     // Unknwon
     ls.Unknwon = golog.NewSimpleLog()
     ls.Unknwon.Tag.Fgcolor = color.FgYellow
     ls.Unknwon.Tag.Bgcolor = 0
-    ls.Unknwon.Tag.Tag = "UNKNOWN"
+    ls.Unknwon.Tag.FormatString = "UNKNOWN"
     ls.Unknwon.Tag.Font = color.Underline
-    ls.Unknwon.FormatString = "&DT &TAG "
+    ls.Unknwon.FormatString = golog.UnifiedLogFormatString
     // CommonLog
-    ls.CommonLog = golog.NewDefaultLog()
-    ls.CommonLog.Format = "&DT &TAG "
-}
-
-func (ls *LogSet) setLevel(level int) {
-    ls.OK.Level = level
-    ls.OK2.Level = level
-    ls.Pass.Level = level
-    ls.Ignored.Level = level
-    ls.Skip.Level = level
-    ls.CommonLog.Level = level
+    ls.CommonLog = golog.NewCommonLog()
+    ls.CommonLog.Format = golog.UnifiedLogFormatString
 }

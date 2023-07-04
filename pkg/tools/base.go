@@ -1,6 +1,6 @@
 package tools
 
-import "github.com/neumannlyu/gobinscan/pkg/config"
+import "github.com/cimercomcn/gobinscan/pkg/config"
 
 var _cfgPtr config.CFG
 

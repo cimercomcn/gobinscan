@@ -3,13 +3,13 @@ package scan
 import (
     "fmt"
 
-    "github.com/neumannlyu/gobinscan/pkg/sql"
+    "github.com/cimercomcn/gobinscan/pkg/sql"
 
     "os"
     "path/filepath"
 
-    "github.com/neumannlyu/gobinscan/pkg/common"
-    "github.com/neumannlyu/gobinscan/pkg/tools"
+    "github.com/cimercomcn/gobinscan/pkg/common"
+    "github.com/cimercomcn/gobinscan/pkg/tools"
     "github.com/neumannlyu/golog"
 )
 
@@ -18,7 +18,7 @@ func Start() common.Report {
 
     // 保存固件文件信息
     _report.Binfile.Name = filepath.Base(_cfgPtr.BinFile)
-    if abs, err := filepath.Abs(_cfgPtr.BinFile); !golog.CheckError(err) {
+    if abs, err := filepath.Abs(_cfgPtr.BinFile); !golog.CatchError(err) {
         _report.Binfile.Dir = filepath.Dir(abs)
         _report.Binfile.MD5 = _report.Binfile.GetMD5()
     }
@@ -70,7 +70,7 @@ func isEncrypted() bool {
     // 判断条件1: 是否有 squashfs-root 目录
     pass1 := true
     fs, err := os.ReadDir(_cfgPtr.BinExtractedDir)
-    golog.CheckError(err)
+    golog.CatchError(err)
 
     // 遍历目录中的文件。如果遇到某些文件时，将跳过。
     for _, file := range fs {
@@ -84,7 +84,7 @@ func isEncrypted() bool {
     pass2 := false
     squashfs_root := filepath.Join(_cfgPtr.BinExtractedDir, "squashfs-root")
     fs, err = os.ReadDir(squashfs_root)
-    if golog.CheckError(err) || len(fs) <= 1 {
+    if golog.CatchError(err) || len(fs) <= 1 {
         pass2 = true
     }
 

@@ -6,8 +6,8 @@ import (
     "path/filepath"
     "strings"
 
-    "github.com/neumannlyu/gobinscan/pkg/common"
-    "github.com/neumannlyu/gobinscan/pkg/sql"
+    "github.com/cimercomcn/gobinscan/pkg/common"
+    "github.com/cimercomcn/gobinscan/pkg/sql"
     "github.com/neumannlyu/golog"
 )
 
@@ -35,6 +35,7 @@ func scanExtractedFiles(root string) {
             if isAliasFile(filepath) {
                 _cfgPtr.Logs.Ignored.Logln(
                     "ignored alias file: " + filepath + ".")
+                fmt.Println()
                 continue
             }
         }
@@ -95,7 +96,7 @@ func scanExtractedFiles(root string) {
                 }
             }
         }
-
+        fmt.Println()
     }
 }
 
@@ -128,7 +129,7 @@ func isDecompressed(name string, files []common.ExtractedFile) (string, bool) {
 //  @return bool
 func isAliasFile(filepath string) bool {
     fileInfo, err := os.Lstat(filepath)
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         return false
     }
 
@@ -150,7 +151,7 @@ func scanExtractedDir(current_path string, curDepth int) (
     var total int = 0
     var skip int = 0
     fs, err := os.ReadDir(current_path)
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         return
     }
 

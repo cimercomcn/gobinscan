@@ -19,7 +19,7 @@ type BinFileInfo struct {
 func (f BinFileInfo) GetMD5() string {
     // 打开要计算 MD5 的文件
     file, err := os.Open(filepath.Join(f.Dir, f.Name))
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         panic(err)
     }
     defer file.Close()
@@ -27,7 +27,7 @@ func (f BinFileInfo) GetMD5() string {
     // 创建一个新的 MD5 hasher
     hasher := md5.New()
     // 将文件内容写入 hasher
-    if _, err := io.Copy(hasher, file); golog.CheckError(err) {
+    if _, err := io.Copy(hasher, file); golog.CatchError(err) {
         panic(err)
     }
 

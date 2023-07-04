@@ -46,14 +46,14 @@ func (exfile *ExtractedFile) GetBinaryVersion() error {
     cmd2 := exec.Command("grep", exfile.VersionSearchKey)
 
     pipe, err := cmd1.StdoutPipe()
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         return err
     }
     defer pipe.Close()
 
     cmd1.Start()
     cmd2.Stdin = pipe
-    if output, err := cmd2.Output(); golog.CheckError(err) {
+    if output, err := cmd2.Output(); golog.CatchError(err) {
         return err
     } else {
         // 分割筛选后的字符串

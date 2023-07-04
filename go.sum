@@ -11,8 +11,10 @@ github.com/mattn/go-colorable v0.1.13/go.mod h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovk
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-isatty v0.0.17 h1:BTarxUcIeDqL27Mc+vyvdWYSL28zpIhv3RoTdsLMPng=
 github.com/mattn/go-isatty v0.0.17/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
-github.com/neumannlyu/golog v0.0.6 h1:wF37RBJ436hSKdFkX+hPFahC+4WPgtMfgebphoTaqk8=
-github.com/neumannlyu/golog v0.0.6/go.mod h1:2xKVvq7hiJHZEaBqWEdHUIrg99/BxyHXPg/gHyR+1yI=
+github.com/cimercomcn/gobinscan v0.0.4 h1:e9TjEBCcX+eDE+3ICxdd7A52PzH4GkXLRpwz7Qqirtw=
+github.com/cimercomcn/gobinscan v0.0.4/go.mod h1:MrUYTYG4SCBnzSk+AEjzUuq4q19lOBJ3Sc3jvsUxPqY=
+github.com/neumannlyu/golog v0.0.17 h1:/xE/d7C+F3QAKfuGXI6DRrdSZtB8Z9IMk4K0yUYR6J4=
+github.com/neumannlyu/golog v0.0.17/go.mod h1:2xKVvq7hiJHZEaBqWEdHUIrg99/BxyHXPg/gHyR+1yI=
 golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=

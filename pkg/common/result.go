@@ -17,7 +17,7 @@ type Report struct {
 
 func (r Report) ToJson() string {
     data, err := json.Marshal(r)
-    if golog.CheckError(err) {
+    if golog.CatchError(err) {
         return ""
     }
 

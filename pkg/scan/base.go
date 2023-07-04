@@ -1,9 +1,9 @@
 package scan
 
 import (
-    "github.com/neumannlyu/gobinscan/pkg/common"
+    "github.com/cimercomcn/gobinscan/pkg/common"
 
-    "github.com/neumannlyu/gobinscan/pkg/config"
+    "github.com/cimercomcn/gobinscan/pkg/config"
 )
 
 var _cfgPtr *config.CFG

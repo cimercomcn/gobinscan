@@ -1,7 +1,5 @@
 package config
 
-import "github.com/neumannlyu/golog"
-
 // 导出的配置实例对象
 var configInstance *CFG = nil
 
@@ -44,8 +42,8 @@ type CFG struct {
     BinExtractedDir string
     // 数据库配置
     DB DBCFG
-    // 设置日志显示等级
-    LogLevel int
+    // // 设置日志显示等级
+    // LogLevel int
     // 日志对象配置
     Logs LogSet
     // 扫描策略
@@ -88,7 +86,6 @@ func GetConfig() *CFG {
         configInstance.DB.User = ""
 
         // Log
-        configInstance.LogLevel = golog.LOGLEVEL_ALL
         configInstance.Logs.applyDefault()
 
         // ScanPolicy 设置扫描策略
@@ -107,10 +104,4 @@ func GetConfig() *CFG {
     }
 
     return configInstance
-}
-
-// 设置日志集中所有的日志对象的日志等级
-func (cfg *CFG) SetLogLevel(level int) {
-    cfg.LogLevel = level
-    cfg.Logs.setLevel(level)
 }
